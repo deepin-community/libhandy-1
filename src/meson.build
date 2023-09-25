@@ -15,12 +15,14 @@ hdy_public_enum_headers = [
   'hdy-leaflet.h',
   'hdy-navigation-direction.h',
   'hdy-squeezer.h',
+  'hdy-style-manager.h',
   'hdy-tab-bar.h',
   'hdy-view-switcher.h',
 ]
 
 hdy_private_enum_headers = [
   'hdy-stackable-box-private.h',
+  'hdy-settings-private.h',
 ]
 
 version_data = configuration_data()
@@ -46,23 +48,32 @@ libhandy_public_headers = []
 libhandy_public_sources = []
 libhandy_private_sources = []
 
-hdy_public_enums = gnome.mkenums('hdy-enums',
-      h_template: 'hdy-enums.h.in',
-      c_template: 'hdy-enums.c.in',
+hdy_public_enums = gnome.mkenums_simple('hdy-enums',
          sources: hdy_public_enum_headers,
+     body_prefix: '#include "config.h"',
+   header_prefix: '#if !defined(_HANDY_INSIDE) && !defined(HANDY_COMPILATION)\n' +
+                  '#error "Only <handy.h> can be included directly."\n' +
+                  '#endif\n' +
+                  '\n' +
+                  '#include "hdy-version.h"\n',
+       decorator: 'HDY_AVAILABLE_IN_ALL',
   install_header: true,
      install_dir: libhandy_header_dir,
 )
 
-hdy_private_enums = gnome.mkenums('hdy-enums-private',
-      h_template: 'hdy-enums-private.h.in',
-      c_template: 'hdy-enums-private.c.in',
+hdy_private_enums = gnome.mkenums_simple('hdy-enums-private',
          sources: hdy_private_enum_headers,
+     body_prefix: '#include "config.h"',
+   header_prefix: '#if !defined(_HANDY_INSIDE) && !defined(HANDY_COMPILATION)\n' +
+                  '#error "Only <handy.h> can be included directly."\n' +
+                  '#endif\n' +
+                  '\n' +
+                  '#include "hdy-enums.h"\n',
   install_header: false,
 )
 
 libhandy_public_sources += [hdy_public_enums[0]]
-libhandy_private_sources += [hdy_private_enums[0]]
+libhandy_private_sources += hdy_private_enums
 libhandy_generated_headers += [hdy_public_enums[1]]
 
 src_headers = [
@@ -92,6 +103,7 @@ src_headers = [
   'hdy-search-bar.h',
   'hdy-squeezer.h',
   'hdy-status-page.h',
+  'hdy-style-manager.h',
   'hdy-swipe-group.h',
   'hdy-swipe-tracker.h',
   'hdy-swipeable.h',
@@ -118,61 +130,67 @@ libhandy_init_public_types = custom_target('hdy-public-types.c',
 )
 
 src_sources = [
-  'gtkprogresstracker.c',
-  'gtk-window.c',
   'hdy-action-row.c',
   'hdy-animation.c',
   'hdy-application-window.c',
   'hdy-avatar.c',
-  'hdy-avatar-icon.c',
-  'hdy-bidi.c',
   'hdy-carousel.c',
-  'hdy-carousel-box.c',
   'hdy-carousel-indicator-dots.c',
   'hdy-carousel-indicator-lines.c',
   'hdy-clamp.c',
   'hdy-combo-row.c',
-  'hdy-css.c',
   'hdy-deck.c',
   'hdy-enum-value-object.c',
   'hdy-expander-row.c',
-  'hdy-fading-label.c',
   'hdy-flap.c',
   'hdy-header-bar.c',
   'hdy-header-group.c',
-  'hdy-keypad-button.c',
   'hdy-keypad.c',
   'hdy-leaflet.c',
   'hdy-main.c',
   'hdy-navigation-direction.c',
-  'hdy-nothing.c',
   'hdy-preferences-group.c',
   'hdy-preferences-page.c',
   'hdy-preferences-row.c',
   'hdy-preferences-window.c',
   'hdy-search-bar.c',
-  'hdy-shadow-helper.c',
   'hdy-squeezer.c',
-  'hdy-stackable-box.c',
   'hdy-status-page.c',
+  'hdy-style-manager.c',
   'hdy-swipe-group.c',
   'hdy-swipe-tracker.c',
   'hdy-swipeable.c',
-  'hdy-tab.c',
   'hdy-tab-bar.c',
-  'hdy-tab-box.c',
   'hdy-tab-view.c',
   'hdy-title-bar.c',
   'hdy-value-object.c',
   'hdy-view-switcher.c',
   'hdy-view-switcher-bar.c',
-  'hdy-view-switcher-button.c',
   'hdy-view-switcher-title.c',
   'hdy-window.c',
   'hdy-window-handle.c',
+]
+
+# Files that should not be introspected
+libhandy_private_sources += files([
+  'gtkprogresstracker.c',
+  'gtk-window.c',
+  'hdy-avatar-icon.c',
+  'hdy-bidi.c',
+  'hdy-carousel-box.c',
+  'hdy-css.c',
+  'hdy-fading-label.c',
+  'hdy-keypad-button.c',
+  'hdy-nothing.c',
+  'hdy-settings.c',
+  'hdy-shadow-helper.c',
+  'hdy-stackable-box.c',
+  'hdy-tab.c',
+  'hdy-tab-box.c',
+  'hdy-view-switcher-button.c',
   'hdy-window-handle-controller.c',
   'hdy-window-mixin.c',
-]
+])
 
 libhandy_public_headers += files(src_headers)
 libhandy_public_sources += files(src_sources)
@@ -215,6 +233,7 @@ libhandy_c_args = [
 config_h = configuration_data()
 config_h.set_quoted('GETTEXT_PACKAGE', 'libhandy')
 config_h.set_quoted('LOCALEDIR', get_option('prefix') / get_option('localedir'))
+config_h.set_quoted('PREFIX', get_option('prefix'))
 
 # Symbol visibility
 if target_system == 'windows'

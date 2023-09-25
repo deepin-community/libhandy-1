@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2018 Purism SPC
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
 #include "config.h"
@@ -14,11 +14,11 @@
 #include "hdy-css-private.h"
 
 /**
- * SECTION:hdy-clamp
- * @short_description: A container constraining its child to a given size.
- * @Title: HdyClamp
+ * HdyClamp:
  *
- * The #HdyClamp widget constraints the size of the widget it contains to a
+ * A widget constraining its child to a given size.
+ *
+ * The `HdyClamp` widget constrains the size of the widget it contains to a
  * given maximum size. It will constrain the width if it is horizontal, or the
  * height if it is vertical. The expansion of the child from its minimum to its
  * maximum size is eased out for a smooth transition.
@@ -26,12 +26,13 @@
  * If the child requires more than the requested maximum size, it will be
  * allocated the minimum size it can fit in instead.
  *
- * # CSS nodes
+ * ## CSS nodes
  *
- * #HdyClamp has a single CSS node with name clamp. The node will get the style
- * classes .large when its child reached its maximum size, .small when the clamp
- * allocates its full size to its child, .medium in-between, or none if it
- * didn't compute its size yet.
+ * `HdyClamp` has a single CSS node with name `clamp`.
+ *
+ * The node will get the style classes `.large` when its child reached its
+ * maximum size, `.small` when the clamp allocates its full size to its child,
+ * `.medium` in-between, or none if it didn't compute its size yet.
  *
  * Since: 1.0
  */
@@ -122,61 +123,65 @@ hdy_clamp_set_property (GObject      *object,
   }
 }
 
-/**
- * get_child_size:
- * @self: a #HdyClamp
- * @for_size: the size of the clamp
- * @child_minimum: the minimum size reachable by the child, and hence by @self
- * @child_maximum: the maximum size @self will ever allocate its child
- * @lower_threshold: the threshold below which @self will allocate its full size to its child
- * @upper_threshold: the threshold up from which @self will allocate its maximum size to its child
- *
- * Measures the child's extremes, the clamp's thresholds, and returns size to
- * allocate to the child.
- *
- * If the clamp is horizontal, all values are widths, otherwise they are
- * heights.
- */
-static gint
-get_child_size (HdyClamp *self,
-                gint      for_size,
-                gint     *child_minimum,
-                gint     *child_maximum,
-                gint     *lower_threshold,
-                gint     *upper_threshold)
+static inline double
+inverse_lerp (double a,
+              double b,
+              double t)
 {
-  GtkBin *bin = GTK_BIN (self);
-  GtkWidget *child;
-  gint min = 0, max = 0, lower = 0, upper = 0;
-  gdouble amplitude, progress;
+  return (t - a) / (b - a);
+}
 
-  child = gtk_bin_get_child (bin);
-  if (child == NULL)
-    return 0;
-
-  if (gtk_widget_get_visible (child)) {
-    if (self->orientation == GTK_ORIENTATION_HORIZONTAL)
-      gtk_widget_get_preferred_width (child, &min, NULL);
-    else
-      gtk_widget_get_preferred_height (child, &min, NULL);
-  }
+static int
+clamp_size_from_child (HdyClamp *self,
+                       int       min,
+                       int       nat)
+{
+  int max = 0, lower = 0, upper = 0;
+  double progress;
 
   lower = MAX (MIN (self->tightening_threshold, self->maximum_size), min);
   max = MAX (lower, self->maximum_size);
-  amplitude = max - lower;
-  upper = HDY_EASE_OUT_TAN_CUBIC * amplitude + lower;
+  upper = lower + HDY_EASE_OUT_TAN_CUBIC * (max - lower);
 
-  if (child_minimum)
-    *child_minimum = min;
+  if (nat <= lower)
+    progress = 0;
+  else if (nat >= max)
+    progress = 1;
+  else {
+    double ease = inverse_lerp (lower, max, nat);
+
+    progress = 1 + cbrt (ease - 1); // inverse ease out cubic
+  }
+
+  return ceil (hdy_lerp (lower, upper, progress));
+}
+
+static int
+child_size_from_clamp (HdyClamp  *self,
+                       GtkWidget *child,
+                       int        for_size,
+                       int       *child_maximum,
+                       int       *lower_threshold)
+{
+  int min = 0, nat = 0, max = 0, lower = 0, upper = 0;
+  double progress;
+
+  if (self->orientation == GTK_ORIENTATION_HORIZONTAL)
+    gtk_widget_get_preferred_width (child, &min, &nat);
+  else
+    gtk_widget_get_preferred_height (child, &min, &nat);
+
+  lower = MAX (MIN (self->tightening_threshold, self->maximum_size), min);
+  max = MAX (lower, self->maximum_size);
+  upper = lower + HDY_EASE_OUT_TAN_CUBIC * (max - lower);
+
   if (child_maximum)
     *child_maximum = max;
   if (lower_threshold)
     *lower_threshold = lower;
-  if (upper_threshold)
-    *upper_threshold = upper;
 
   if (for_size < 0)
-    return 0;
+    return MIN (nat, max);
 
   if (for_size <= lower)
     return for_size;
@@ -184,9 +189,9 @@ get_child_size (HdyClamp *self,
   if (for_size >= upper)
     return max;
 
-  progress = (double) (for_size - lower) / (double) (upper - lower);
+  progress = inverse_lerp (lower, upper, for_size);
 
-  return hdy_ease_out_cubic (progress) * amplitude + lower;
+  return hdy_lerp (lower, max, hdy_ease_out_cubic (progress));
 }
 
 /* This private method is prefixed by the call name because it will be a virtual
@@ -204,7 +209,10 @@ hdy_clamp_measure (GtkWidget      *widget,
   HdyClamp *self = HDY_CLAMP (widget);
   GtkBin *bin = GTK_BIN (widget);
   GtkWidget *child;
-  gint child_size = 0;
+  int child_min = 0;
+  int child_nat = 0;
+  int child_min_baseline = -1;
+  int child_nat_baseline = -1;
 
   if (minimum)
     *minimum = 0;
@@ -217,35 +225,44 @@ hdy_clamp_measure (GtkWidget      *widget,
 
   child = gtk_bin_get_child (bin);
 
+  if (!child || !gtk_widget_is_visible (child))
+    return;
+
   for_size = hdy_css_adjust_for_size (widget, orientation, for_size);
 
-  if (orientation == GTK_ORIENTATION_HORIZONTAL) {
-    if (self->orientation == orientation) {
-      if (child && gtk_widget_get_visible (child))
-        gtk_widget_get_preferred_width (child, minimum, natural);
-    } else {
-      child_size = get_child_size (HDY_CLAMP (widget), for_size, NULL, NULL, NULL, NULL);
+  if (self->orientation == orientation) {
+    if (orientation == GTK_ORIENTATION_HORIZONTAL)
+      gtk_widget_get_preferred_width (child, &child_min, &child_nat);
+    else
+      gtk_widget_get_preferred_height_and_baseline_for_width (child, -1,
+                                                              &child_min,
+                                                              &child_nat,
+                                                              &child_min_baseline,
+                                                              &child_nat_baseline);
 
-      gtk_widget_get_preferred_width_for_height (child,
-                                                 child_size,
-                                                 minimum,
-                                                 natural);
-    }
+    child_nat = clamp_size_from_child (self, child_min, child_nat);
   } else {
-    if (self->orientation == orientation) {
-      if (child && gtk_widget_get_visible (child))
-        gtk_widget_get_preferred_height (child, minimum, natural);
-    } else {
-      child_size = get_child_size (HDY_CLAMP (widget), for_size, NULL, NULL, NULL, NULL);
+    int child_size = child_size_from_clamp (self, child, for_size, NULL, NULL);
 
-      gtk_widget_get_preferred_height_and_baseline_for_width (child,
-                                                              child_size,
-                                                              minimum,
-                                                              natural,
-                                                              minimum_baseline,
-                                                              natural_baseline);
-    }
+    if (orientation == GTK_ORIENTATION_HORIZONTAL)
+      gtk_widget_get_preferred_width_for_height (child, child_size,
+                                                 &child_min, &child_nat);
+    else
+      gtk_widget_get_preferred_height_and_baseline_for_width (child, child_size,
+                                                              &child_min,
+                                                              &child_nat,
+                                                              &child_min_baseline,
+                                                              &child_nat_baseline);
   }
+
+  if (minimum)
+    *minimum = child_min;
+  if (natural)
+    *natural = child_nat;
+  if (minimum_baseline && child_min_baseline > -1)
+    *minimum_baseline = child_min_baseline;
+  if (natural_baseline && child_nat_baseline > -1)
+    *natural_baseline = child_nat_baseline;
 
   hdy_css_measure (widget, orientation, minimum, natural);
 }
@@ -340,12 +357,17 @@ hdy_clamp_size_allocate (GtkWidget     *widget,
   base_child_allocation = child_allocation;
 
   if (self->orientation == GTK_ORIENTATION_HORIZONTAL) {
-    child_allocation.width = get_child_size (self, child_allocation.width, NULL, &child_maximum, &lower_threshold, NULL);
+    child_allocation.width = child_size_from_clamp (self, child,
+                                                    child_allocation.width,
+                                                    &child_maximum,
+                                                    &lower_threshold);
 
     child_clamped_size = child_allocation.width;
-  }
-  else {
-    child_allocation.height = get_child_size (self, child_allocation.height, NULL, &child_maximum, &lower_threshold, NULL);
+  } else {
+    child_allocation.height = child_size_from_clamp (self, child,
+                                                     child_allocation.height,
+                                                     &child_maximum,
+                                                     &lower_threshold);
 
     child_clamped_size = child_allocation.height;
   }
@@ -364,7 +386,7 @@ hdy_clamp_size_allocate (GtkWidget     *widget,
     gtk_style_context_remove_class (context, "large");
   }
 
-  /* This always center the child on the side of the orientation. */
+  /* Always center the child on the side of the orientation. */
   if (self->orientation == GTK_ORIENTATION_HORIZONTAL)
     child_allocation.x += (base_child_allocation.width - child_allocation.width) / 2;
   else
@@ -400,10 +422,12 @@ hdy_clamp_class_init (HdyClampClass *klass)
                                     "orientation");
 
   /**
-   * HdyClamp:maximum-size:
+   * HdyClamp:maximum-size: (attributes org.gtk.Property.get=hdy_clamp_get_maximum_size org.gtk.Property.set=hdy_clamp_set_maximum_size)
    *
-   * The maximum size to allocate to the child. It is the width if the clamp is
-   * horizontal, or the height if it is vertical.
+   * The maximum size to allocate the children.
+   *
+   * It is the width if the clamp is horizontal, or the height if it is
+   * vertical.
    *
    * Since: 1.0
    */
@@ -415,19 +439,21 @@ hdy_clamp_class_init (HdyClampClass *klass)
                         G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyClamp:tightening-threshold:
+   * HdyClamp:tightening-threshold: (attributes org.gtk.Property.get=hdy_clamp_get_tightening_threshold org.gtk.Property.set=hdy_clamp_set_tightening_threshold)
    *
-   * The size starting from which the clamp will tighten its grip on the child,
+   * The size above which the child is clamped.
+   *
+   * Starting from this size, the layout will tighten its grip on the children,
    * slowly allocating less and less of the available size up to the maximum
-   * allocated size. Below that threshold and below the maximum width, the child
-   * will be allocated all the available size.
+   * allocated size. Below that threshold and below the maximum size, the
+   * children will be allocated all the available size.
    *
-   * If the threshold is greater than the maximum size to allocate to the child,
-   * the child will be allocated all the width up to the maximum.
-   * If the threshold is lower than the minimum size to allocate to the child,
-   * that size will be used as the tightening threshold.
+   * If the threshold is greater than the maximum size to allocate to the
+   * children, they will be allocated the whole size up to the maximum. If the
+   * threshold is lower than the minimum size to allocate to the children, that
+   * size will be used as the tightening threshold.
    *
-   * Effectively, tightening the grip on the child before it reaches its maximum
+   * Effectively, tightening the grip on a child before it reaches its maximum
    * size makes transitions to and from the maximum size smoother when resizing.
    *
    * Since: 1.0
@@ -454,9 +480,9 @@ hdy_clamp_init (HdyClamp *self)
 /**
  * hdy_clamp_new:
  *
- * Creates a new #HdyClamp.
+ * Creates a new `HdyClamp`.
  *
- * Returns: a new #HdyClamp
+ * Returns: the newly created `HdyClamp`
  *
  * Since: 1.0
  */
@@ -467,13 +493,12 @@ hdy_clamp_new (void)
 }
 
 /**
- * hdy_clamp_get_maximum_size:
- * @self: a #HdyClamp
+ * hdy_clamp_get_maximum_size: (attributes org.gtk.Method.get_property=maximum-size)
+ * @self: a clamp
  *
- * Gets the maximum size to allocate to the contained child. It is the width if
- * @self is horizontal, or the height if it is vertical.
+ * Gets the maximum size allocated to the children.
  *
- * Returns: the maximum size to allocate to the contained child.
+ * Returns: the maximum size to allocate to the children
  *
  * Since: 1.0
  */
@@ -486,12 +511,11 @@ hdy_clamp_get_maximum_size (HdyClamp *self)
 }
 
 /**
- * hdy_clamp_set_maximum_size:
- * @self: a #HdyClamp
+ * hdy_clamp_set_maximum_size: (attributes org.gtk.Method.set_property=maximum-size)
+ * @self: a clamp
  * @maximum_size: the maximum size
  *
- * Sets the maximum size to allocate to the contained child. It is the width if
- * @self is horizontal, or the height if it is vertical.
+ * Sets the maximum size allocated to the children.
  *
  * Since: 1.0
  */
@@ -512,14 +536,12 @@ hdy_clamp_set_maximum_size (HdyClamp *self,
 }
 
 /**
- * hdy_clamp_get_tightening_threshold:
- * @self: a #HdyClamp
+ * hdy_clamp_get_tightening_threshold: (attributes org.gtk.Method.get_property=tightening-threshold)
+ * @self: a clamp
  *
- * Gets the size starting from which the clamp will tighten its grip on the
- * child.
+ * Gets the size above which the children are clamped.
  *
- * Returns: the size starting from which the clamp will tighten its grip on the
- * child.
+ * Returns: the size above which the children are clamped
  *
  * Since: 1.0
  */
@@ -532,12 +554,11 @@ hdy_clamp_get_tightening_threshold (HdyClamp *self)
 }
 
 /**
- * hdy_clamp_set_tightening_threshold:
- * @self: a #HdyClamp
+ * hdy_clamp_set_tightening_threshold: (attributes org.gtk.Method.set_property=tightening-threshold)
+ * @self: a clamp
  * @tightening_threshold: the tightening threshold
  *
- * Sets the size starting from which the clamp will tighten its grip on the
- * child.
+ * Sets the size above which the children are clamped.
  *
  * Since: 1.0
  */

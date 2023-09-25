@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
 /*
@@ -34,16 +34,14 @@
 #include <glib/gi18n-lib.h>
 
 /**
- * PRIVATE:hdy-window-handle-controller
- * @short_description: An oblect that makes widgets behave like titlebars.
- * @Title: HdyWindowHandleController
- * @See_also: #HdyHeaderBar, #HdyWindowHandle
- * @stability: Private
+ * HdyWindowHandleController:
+ *
+ * An oblect that makes widgets behave like titlebars.
  *
  * When HdyWindowHandleController is added to the widget, dragging that widget
  * will move the window, and right click, double click and middle click will be
  * handled as if that widget was a titlebar. Currently it's used to implement
- * these properties in #HdyWindowHandle and #HdyHeaderBar
+ * these properties in [class@WindowHandle] and [class@HeaderBar]
  *
  * Since: 1.0
  */
@@ -415,14 +413,8 @@ pressed_cb (GtkGestureMultiPress      *gesture,
 
   switch (button) {
   case GDK_BUTTON_PRIMARY:
-    gdk_window_raise (gtk_widget_get_window (window));
-
-    if (n_press == 2)
-        titlebar_action (self, event, button);
-
-    if (gtk_widget_has_grab (window))
-      gtk_gesture_set_sequence_state (GTK_GESTURE (gesture),
-                                      sequence, GTK_EVENT_SEQUENCE_CLAIMED);
+    gtk_gesture_set_sequence_state (GTK_GESTURE (gesture),
+                                    sequence, GTK_EVENT_SEQUENCE_DENIED);
 
     break;
 
@@ -472,11 +464,11 @@ hdy_window_handle_controller_init (HdyWindowHandleController *self)
 
 /**
  * hdy_window_handle_controller_new:
- * @widget: The widget to create a controller for
+ * @widget: the widget to create a controller for
  *
- * Creates a new #HdyWindowHandleController for @widget.
+ * Creates a new `HdyWindowHandleController` for @widget.
  *
- * Returns: (transfer full): a newly created #HdyWindowHandleController
+ * Returns: the newly created `HdyWindowHandleController`
  *
  * Since: 1.0
  */

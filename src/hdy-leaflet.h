@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2018 Purism SPC
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
 #pragma once
@@ -31,7 +31,7 @@ typedef enum {
 
 /**
  * HdyLeafletClass
- * @parent_class: The parent class
+ * @parent_class: the parent class
  */
 struct _HdyLeafletClass
 {

@@ -1,3 +1,4 @@
 version=4
-https://download.gnome.org/sources/libhandy/([\d\.]+)/ \
-	libhandy@ANY_VERSION@\.tar\.xz
+opts="searchmode=plain, uversionmangle=s/\.(alpha|beta|rc)/~$1/, downloadurlmangle=s|cache.json||" \
+https://download.gnome.org/sources/libhandy/cache.json \
+	[\d.]+/libhandy-([\d.]+)@ARCHIVE_EXT@

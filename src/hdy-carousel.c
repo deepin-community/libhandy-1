@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019 Alexander Mikhaylenko <exalm7659@gmail.com>
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
 #include "config.h"
@@ -20,17 +20,19 @@
 #define DEFAULT_DURATION 250
 
 /**
- * SECTION:hdy-carousel
- * @short_description: A paginated scrolling widget.
- * @title: HdyCarousel
- * @See_also: #HdyCarouselIndicatorDots, #HdyCarouselIndicatorLines
+ * HdyCarousel:
  *
- * The #HdyCarousel widget can be used to display a set of pages with
+ * A paginated scrolling widget.
+ *
+ * The `HdyCarousel` widget can be used to display a set of pages with
  * swipe-based navigation between them.
  *
- * # CSS nodes
+ * [class@CarouselIndicatorDots] and [class@CarouselIndicatorLines] can be used
+ * to provide page indicators for `HdyCarousel`.
  *
- * #HdyCarousel has a single CSS node with name carousel.
+ * ## CSS nodes
+ *
+ * `HdyCarousel` has a single CSS node with name `carousel`.
  *
  * Since: 1.0
  */
@@ -48,7 +50,7 @@ struct _HdyCarousel
   GtkOrientation orientation;
   guint animation_duration;
 
-  gulong scroll_timeout_id;
+  guint scroll_timeout_id;
   gboolean can_scroll;
 };
 
@@ -360,7 +362,8 @@ scroll_event_cb (HdyCarousel *self,
   duration = MIN (self->animation_duration, DEFAULT_DURATION);
 
   self->can_scroll = FALSE;
-  g_timeout_add (duration, (GSourceFunc) scroll_timeout_cb, self);
+  self->scroll_timeout_id =
+   g_timeout_add (duration, (GSourceFunc) scroll_timeout_cb, self);
 
   return GDK_EVENT_STOP;
 }
@@ -405,7 +408,7 @@ hdy_carousel_remove (GtkContainer *container,
 {
   HdyCarousel *self = HDY_CAROUSEL (container);
 
-  if (self->scrolling_box)
+  if (self->scrolling_box && widget != GTK_WIDGET (self->scrolling_box))
     gtk_container_remove (GTK_CONTAINER (self->scrolling_box), widget);
   else
     GTK_CONTAINER_CLASS (hdy_carousel_parent_class)->remove (container, widget);
@@ -587,9 +590,9 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
   container_class->forall = hdy_carousel_forall;
 
   /**
-   * HdyCarousel:n-pages:
+   * HdyCarousel:n-pages: (attributes org.gtk.Property.get=hdy_carousel_get_n_pages)
    *
-   * The number of pages in a #HdyCarousel
+   * The number of pages in a [class@Carousel].
    *
    * Since: 1.0
    */
@@ -603,10 +606,11 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
                        G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyCarousel:position:
+   * HdyCarousel:position: (attributes org.gtk.Property.get=hdy_carousel_get_position)
    *
-   * Current scrolling position, unitless. 1 matches 1 page. Use
-   * hdy_carousel_scroll_to() for changing it.
+   * Current scrolling position, unitless.
+   *
+   * 1 matches 1 page. Use [method@Carousel.scroll_to] for changing it.
    *
    * Since: 1.0
    */
@@ -620,10 +624,12 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
                          G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyCarousel:interactive:
+   * HdyCarousel:interactive: (attributes org.gtk.Property.get=hdy_carousel_get_interactive org.gtk.Property.set=hdy_carousel_set_interactive)
    *
-   * Whether the carousel can be navigated. This can be used to temporarily
-   * disable a #HdyCarousel to only allow navigating it in a certain state.
+   * Whether the carousel can be navigated.
+   *
+   * This can be used to temporarily disable a `HdyCarousel` to only allow
+   * navigating it in a certain state.
    *
    * Since: 1.0
    */
@@ -635,7 +641,7 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
                           G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyCarousel:spacing:
+   * HdyCarousel:spacing: (attributes org.gtk.Property.get=hdy_carousel_get_spacing org.gtk.Property.set=hdy_carousel_set_spacing)
    *
    * Spacing between pages in pixels.
    *
@@ -651,9 +657,9 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
                        G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyCarousel:animation-duration:
+   * HdyCarousel:animation-duration: (attributes org.gtk.Property.get=hdy_carousel_get_animation_duration org.gtk.Property.set=hdy_carousel_set_animation_duration)
    *
-   * Animation duration in milliseconds, used by hdy_carousel_scroll_to().
+   * Animation duration used by [method@Carousel.scroll_to], in milliseconds.
    *
    * Since: 1.0
    */
@@ -665,10 +671,11 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
                        G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyCarousel:allow-mouse-drag:
+   * HdyCarousel:allow-mouse-drag: (attributes org.gtk.Property.get=hdy_carousel_get_allow_mouse_drag org.gtk.Property.set=hdy_carousel_set_allow_mouse_drag)
    *
-   * Sets whether the #HdyCarousel can be dragged with mouse pointer. If the
-   * value is %FALSE, dragging is only available on touch.
+   * Sets whether the [class@Carousel] can be dragged with mouse pointer.
+   *
+   * If the value is `FALSE`, dragging is only available on touch.
    *
    * Since: 1.0
    */
@@ -680,10 +687,11 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
                           G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyCarousel:allow-scroll-wheel:
+   * HdyCarousel:allow-scroll-wheel: (attributes org.gtk.Property.get=hdy_carousel_get_allow_scroll_wheel org.gtk.Property.set=hdy_carousel_set_allow_scroll_wheel)
    *
-   * Whether the widget will respond to scroll wheel events. If the value is
-   * %FALSE, wheel events will be ignored.
+   * Whether the widget will respond to scroll wheel events.
+   *
+   * If the value is `FALSE`, wheel events will be ignored.
    *
    * Since: 1.4
    */
@@ -695,10 +703,11 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
                           G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyCarousel:allow-long-swipes:
+   * HdyCarousel:allow-long-swipes: (attributes org.gtk.Property.get=hdy_carousel_get_allow_long_swipes org.gtk.Property.set=hdy_carousel_set_allow_long_swipes)
    *
-   * Whether to allow swiping for more than one page at a time. If the value is
-   * %FALSE, each swipe can only move to the adjacent pages.
+   * Whether to allow swiping for more than one page at a time.
+   *
+   * If the value is `FALSE`, each swipe can only move to the adjacent pages.
    *
    * Since: 1.2
    */
@@ -710,9 +719,9 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
                           G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
-   * HdyCarousel:reveal-duration:
+   * HdyCarousel:reveal-duration: (attributes org.gtk.Property.get=hdy_carousel_get_reveal_duration org.gtk.Property.set=hdy_carousel_set_reveal_duration)
    *
-   * Page reveal duration in milliseconds.
+   * Page reveal duration, in milliseconds.
    *
    * Since: 1.0
    */
@@ -733,12 +742,13 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
 
   /**
    * HdyCarousel::page-changed:
-   * @self: The #HdyCarousel instance
-   * @index: Current page
+   * @self: a carousel
+   * @index: the current page
    *
-   * This signal is emitted after a page has been changed. This can be used to
-   * implement "infinite scrolling" by connecting to this signal and amending
-   * the pages.
+   * This signal is emitted after a page has been changed.
+   *
+   * It can be used to implement "infinite scrolling" by amending the pages
+   * after every scroll.
    *
    * Since: 1.0
    */
@@ -764,6 +774,8 @@ hdy_carousel_class_init (HdyCarouselClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, position_shifted_cb);
 
   gtk_widget_class_set_css_name (widget_class, "carousel");
+
+  g_type_ensure (HDY_TYPE_CAROUSEL_BOX);
 }
 
 static void
@@ -771,7 +783,6 @@ hdy_carousel_init (HdyCarousel *self)
 {
   self->allow_scroll_wheel = TRUE;
 
-  g_type_ensure (HDY_TYPE_CAROUSEL_BOX);
   gtk_widget_init_template (GTK_WIDGET (self));
 
   self->animation_duration = DEFAULT_DURATION;
@@ -789,9 +800,9 @@ hdy_carousel_init (HdyCarousel *self)
 /**
  * hdy_carousel_new:
  *
- * Create a new #HdyCarousel widget.
+ * Creates a new `HdyCarousel`.
  *
- * Returns: The newly created #HdyCarousel widget
+ * Returns: the newly created `HdyCarousel`
  *
  * Since: 1.0
  */
@@ -803,10 +814,10 @@ hdy_carousel_new (void)
 
 /**
  * hdy_carousel_prepend:
- * @self: a #HdyCarousel
+ * @self: a carousel
  * @child: a widget to add
  *
- * Prepends @child to @self
+ * Prepends @child to @self.
  *
  * Since: 1.0
  */
@@ -821,14 +832,14 @@ hdy_carousel_prepend (HdyCarousel *self,
 
 /**
  * hdy_carousel_insert:
- * @self: a #HdyCarousel
+ * @self: a carousel
  * @child: a widget to add
- * @position: the position to insert @child in.
+ * @position: the position to insert @child in
  *
  * Inserts @child into @self at position @position.
  *
- * If position is -1, or larger than the number of pages,
- * @child will be appended to the end.
+ * If position is -1, or larger than the number of pages, @child will be
+ * appended to the end.
  *
  * Since: 1.0
  */
@@ -843,9 +854,9 @@ hdy_carousel_insert (HdyCarousel *self,
 }
 /**
  * hdy_carousel_reorder:
- * @self: a #HdyCarousel
+ * @self: a carousel
  * @child: a widget to add
- * @position: the position to move @child to.
+ * @position: the position to move @child to
  *
  * Moves @child into position @position.
  *
@@ -867,12 +878,13 @@ hdy_carousel_reorder (HdyCarousel *self,
 
 /**
  * hdy_carousel_scroll_to:
- * @self: a #HdyCarousel
+ * @self: a carousel
  * @widget: a child of @self
  *
  * Scrolls to @widget position with an animation.
- * #HdyCarousel:animation-duration property can be used for controlling the
- * duration.
+ *
+ * [property@Carousel:animation-duration] property can be used for controlling
+ * the duration.
  *
  * Since: 1.0
  */
@@ -887,9 +899,9 @@ hdy_carousel_scroll_to (HdyCarousel *self,
 
 /**
  * hdy_carousel_scroll_to_full:
- * @self: a #HdyCarousel
+ * @self: a carousel
  * @widget: a child of @self
- * @duration: animation duration in milliseconds
+ * @duration: animation duration, in milliseconds
  *
  * Scrolls to @widget position with an animation.
  *
@@ -915,12 +927,12 @@ hdy_carousel_scroll_to_full (HdyCarousel *self,
 }
 
 /**
- * hdy_carousel_get_n_pages:
- * @self: a #HdyCarousel
+ * hdy_carousel_get_n_pages: (attributes org.gtk.Method.get_property=n-pages)
+ * @self: a carousel
  *
  * Gets the number of pages in @self.
  *
- * Returns: The number of pages in @self
+ * Returns: the number of pages in @self
  *
  * Since: 1.0
  */
@@ -933,12 +945,12 @@ hdy_carousel_get_n_pages (HdyCarousel *self)
 }
 
 /**
- * hdy_carousel_get_position:
- * @self: a #HdyCarousel
+ * hdy_carousel_get_position: (attributes org.gtk.Method.get_property=position)
+ * @self: a carousel
  *
  * Gets current scroll position in @self. It's unitless, 1 matches 1 page.
  *
- * Returns: The scroll position
+ * Returns: the scroll position
  *
  * Since: 1.0
  */
@@ -951,12 +963,12 @@ hdy_carousel_get_position (HdyCarousel *self)
 }
 
 /**
- * hdy_carousel_get_interactive
- * @self: a #HdyCarousel
+ * hdy_carousel_get_interactive: (attributes org.gtk.Method.get_property=interactive)
+ * @self: a carousel
  *
  * Gets whether @self can be navigated.
  *
- * Returns: %TRUE if @self can be swiped
+ * Returns: `TRUE` if @self can be swiped
  *
  * Since: 1.0
  */
@@ -969,12 +981,14 @@ hdy_carousel_get_interactive (HdyCarousel *self)
 }
 
 /**
- * hdy_carousel_set_interactive
- * @self: a #HdyCarousel
- * @interactive: whether @self can be swiped.
+ * hdy_carousel_set_interactive: (attributes org.gtk.Method.set_property=interactive)
+ * @self: a carousel
+ * @interactive: whether @self can be swiped
  *
- * Sets whether @self can be navigated. This can be used to temporarily disable
- * a #HdyCarousel to only allow swiping in a certain state.
+ * Sets whether @self can be navigated.
+ *
+ * This can be used to temporarily disable a [class@Carousel] to only allow
+ * swiping in a certain state.
  *
  * Since: 1.0
  */
@@ -995,12 +1009,12 @@ hdy_carousel_set_interactive (HdyCarousel *self,
 }
 
 /**
- * hdy_carousel_get_spacing:
- * @self: a #HdyCarousel
+ * hdy_carousel_get_spacing: (attributes org.gtk.Method.get_property=spacing)
+ * @self: a carousel
  *
  * Gets spacing between pages in pixels.
  *
- * Returns: Spacing between pages
+ * Returns: spacing between pages
  *
  * Since: 1.0
  */
@@ -1013,8 +1027,8 @@ hdy_carousel_get_spacing (HdyCarousel *self)
 }
 
 /**
- * hdy_carousel_set_spacing:
- * @self: a #HdyCarousel
+ * hdy_carousel_set_spacing: (attributes org.gtk.Method.set_property=spacing)
+ * @self: a carousel
  * @spacing: the new spacing value
  *
  * Sets spacing between pages in pixels.
@@ -1031,12 +1045,12 @@ hdy_carousel_set_spacing (HdyCarousel *self,
 }
 
 /**
- * hdy_carousel_get_animation_duration:
- * @self: a #HdyCarousel
+ * hdy_carousel_get_animation_duration: (attributes org.gtk.Method.get_property=animation-duration)
+ * @self: a carousel
  *
- * Gets animation duration used by hdy_carousel_scroll_to().
+ * Gets animation duration used by [method@Carousel.scroll_to].
  *
- * Returns: Animation duration in milliseconds
+ * Returns: animation duration, in milliseconds
  *
  * Since: 1.0
  */
@@ -1049,11 +1063,11 @@ hdy_carousel_get_animation_duration (HdyCarousel *self)
 }
 
 /**
- * hdy_carousel_set_animation_duration:
- * @self: a #HdyCarousel
- * @duration: animation duration in milliseconds
+ * hdy_carousel_set_animation_duration: (attributes org.gtk.Method.set_property=animation-duration)
+ * @self: a carousel
+ * @duration: animation duration, in milliseconds
  *
- * Sets animation duration used by hdy_carousel_scroll_to().
+ * Sets animation duration used by [method@Carousel.scroll_to].
  *
  * Since: 1.0
  */
@@ -1072,12 +1086,12 @@ hdy_carousel_set_animation_duration (HdyCarousel *self,
 }
 
 /**
- * hdy_carousel_get_allow_mouse_drag:
- * @self: a #HdyCarousel
+ * hdy_carousel_get_allow_mouse_drag: (attributes org.gtk.Method.get_property=allow-mouse-drag)
+ * @self: a carousel
  *
- * Sets whether @self can be dragged with mouse pointer
+ * Sets whether @self can be dragged with mouse pointer.
  *
- * Returns: %TRUE if @self can be dragged with mouse
+ * Returns: `TRUE` if @self can be dragged with mouse
  *
  * Since: 1.0
  */
@@ -1090,12 +1104,13 @@ hdy_carousel_get_allow_mouse_drag (HdyCarousel *self)
 }
 
 /**
- * hdy_carousel_set_allow_mouse_drag:
- * @self: a #HdyCarousel
+ * hdy_carousel_set_allow_mouse_drag: (attributes org.gtk.Method.set_property=allow-mouse-drag)
+ * @self: a carousel
  * @allow_mouse_drag: whether @self can be dragged with mouse pointer
  *
- * Sets whether @self can be dragged with mouse pointer. If @allow_mouse_drag
- * is %FALSE, dragging is only available on touch.
+ * Sets whether @self can be dragged with mouse pointer.
+ *
+ * If @allow_mouse_drag is `FALSE`, dragging is only available on touch.
  *
  * Since: 1.0
  */
@@ -1116,12 +1131,12 @@ hdy_carousel_set_allow_mouse_drag (HdyCarousel *self,
 }
 
 /**
- * hdy_carousel_get_allow_scroll_wheel:
- * @self: a #HdyCarousel
+ * hdy_carousel_get_allow_scroll_wheel: (attributes org.gtk.Method.get_property=allow-scroll-wheel)
+ * @self: a carousel
  *
  * Gets whether @self will respond to scroll wheel events.
  *
- * Returns: %TRUE if @self will respond to scroll wheel events
+ * Returns: `TRUE` if @self will respond to scroll wheel events
  *
  * Since: 1.4
  */
@@ -1134,12 +1149,11 @@ hdy_carousel_get_allow_scroll_wheel (HdyCarousel *self)
 }
 
 /**
- * hdy_carousel_set_allow_scroll_wheel:
- * @self: a #HdyCarousel
- * @allow_scroll_wheel: whether @self will respond to scroll wheel events.
+ * hdy_carousel_set_allow_scroll_wheel: (attributes org.gtk.Method.set_property=allow-scroll-wheel)
+ * @self: a carousel
+ * @allow_scroll_wheel: whether @self will respond to scroll wheel events
  *
- * Sets whether @self will respond to scroll wheel events. If the value is
- * %FALSE, wheel events will be ignored.
+ * Sets whether @self will respond to scroll wheel events.
  *
  * Since: 1.4
  */
@@ -1160,13 +1174,12 @@ hdy_carousel_set_allow_scroll_wheel (HdyCarousel *self,
 }
 
 /**
- * hdy_carousel_get_allow_long_swipes:
- * @self: a #HdyCarousel
+ * hdy_carousel_get_allow_long_swipes: (attributes org.gtk.Method.get_property=allow-long-swipes)
+ * @self: a carousel
  *
- * Whether to allow swiping for more than one page at a time. If the value is
- * %FALSE, each swipe can only move to the adjacent pages.
+ * Gets whether to allow swiping for more than one page at a time.
  *
- * Returns: %TRUE if long swipes are allowed, %FALSE otherwise
+ * Returns: `TRUE` if long swipes are allowed
  *
  * Since: 1.2
  */
@@ -1179,12 +1192,11 @@ hdy_carousel_get_allow_long_swipes (HdyCarousel *self)
 }
 
 /**
- * hdy_carousel_set_allow_long_swipes:
- * @self: a #HdyCarousel
+ * hdy_carousel_set_allow_long_swipes: (attributes org.gtk.Method.set_property=allow-long-swipes)
+ * @self: a carousel
  * @allow_long_swipes: whether to allow long swipes
  *
- * Sets whether to allow swiping for more than one page at a time. If the value
- * is %FALSE, each swipe can only move to the adjacent pages.
+ * Sets whether to allow swiping for more than one page at a time.
  *
  * Since: 1.2
  */
@@ -1205,13 +1217,13 @@ hdy_carousel_set_allow_long_swipes (HdyCarousel *self,
 }
 
 /**
- * hdy_carousel_get_reveal_duration:
- * @self: a #HdyCarousel
+ * hdy_carousel_get_reveal_duration: (attributes org.gtk.Method.get_property=reveal-duration)
+ * @self: a carousel
  *
- * Gets duration of the animation used when adding or removing pages in
+ * Gets duration of the animation used when adding or removing pages, in
  * milliseconds.
  *
- * Returns: Page reveal duration
+ * Returns: the duration
  *
  * Since: 1.0
  */
@@ -1224,11 +1236,11 @@ hdy_carousel_get_reveal_duration (HdyCarousel *self)
 }
 
 /**
- * hdy_carousel_set_reveal_duration:
- * @self: a #HdyCarousel
+ * hdy_carousel_set_reveal_duration: (attributes org.gtk.Method.set_property=reveal-duration)
+ * @self: a carousel
  * @reveal_duration: the new reveal duration value
  *
- * Sets duration of the animation used when adding or removing pages in
+ * Sets duration of the animation used when adding or removing pages, in
  * milliseconds.
  *
  * Since: 1.0
