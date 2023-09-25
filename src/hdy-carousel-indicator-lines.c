@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2020 Alexander Mikhaylenko <alexm@gnome.org>
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
 #include "config.h"
@@ -22,19 +22,20 @@
 #define LINE_MARGIN 2
 
 /**
- * SECTION:hdy-carousel-indicator-lines
- * @short_description: A lines indicator for #HdyCarousel
- * @title: HdyCarouselIndicatorLines
- * @See_also: #HdyCarousel, #HdyCarouselIndicatorDots
+ * HdyCarouselIndicatorLines:
  *
- * The #HdyCarouselIndicatorLines widget can be used to show a set of thin and long
- * rectangles for each page of a given #HdyCarousel. The carousel's active page
- * is shown with another rectangle that moves between them to match the
- * carousel's position.
+ * A lines indicator for [class@Carousel].
  *
- * # CSS nodes
+ * The `HdyCarouselIndicatorLines` widget shows a set of lines for each page of
+ * a given [class@Carousel]. The carousel's active page is shown as another line
+ * that moves between them to match the carousel's position.
  *
- * #HdyCarouselIndicatorLines has a single CSS node with name carouselindicatorlines.
+ * See also [class@CarouselIndicatorDots].
+ *
+ * ## CSS nodes
+ *
+ * `HdyCarouselIndicatorLines` has a single CSS node with name
+ * `carouselindicatorlines`.
  *
  * Since: 1.0
  */
@@ -74,7 +75,7 @@ animation_cb (GtkWidget     *widget,
 
   g_assert (self->tick_cb_id > 0);
 
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  gtk_widget_queue_resize (GTK_WIDGET (self));
 
   frame_time = gdk_frame_clock_get_frame_time (frame_clock) / 1000;
 
@@ -105,13 +106,13 @@ animate (HdyCarouselIndicatorLines *self,
   gint64 frame_time;
 
   if (duration <= 0 || !hdy_get_enable_animations (GTK_WIDGET (self))) {
-    gtk_widget_queue_draw (GTK_WIDGET (self));
+    gtk_widget_queue_resize (GTK_WIDGET (self));
     return;
   }
 
   frame_clock = gtk_widget_get_frame_clock (GTK_WIDGET (self));
   if (!frame_clock) {
-    gtk_widget_queue_draw (GTK_WIDGET (self));
+    gtk_widget_queue_resize (GTK_WIDGET (self));
     return;
   }
 
@@ -228,11 +229,27 @@ hdy_carousel_indicator_lines_measure (GtkWidget      *widget,
   gint size = 0;
 
   if (orientation == self->orientation) {
-    gint n_pages = 0;
-    if (self->carousel)
-      n_pages = hdy_carousel_get_n_pages (self->carousel);
+    gint i, n_points = 0;
+    gdouble indicator_length, line_size;
+    g_autofree gdouble *points = NULL;
+    g_autofree gdouble *sizes = NULL;
 
-    size = MAX (0, (LINE_LENGTH + LINE_SPACING) * n_pages - LINE_SPACING);
+    if (self->carousel)
+      points = hdy_swipeable_get_snap_points (HDY_SWIPEABLE (self->carousel), &n_points);
+
+    sizes = g_new0 (gdouble, n_points);
+
+    if (n_points > 0)
+      sizes[0] = points[0] + 1;
+    for (i = 1; i < n_points; i++)
+      sizes[i] = points[i] - points[i - 1];
+
+    line_size = LINE_LENGTH + LINE_SPACING;
+    indicator_length = 0;
+    for (i = 0; i < n_points; i++)
+      indicator_length += line_size * sizes[i];
+
+    size = ceil (indicator_length);
   } else {
     size = LINE_WIDTH;
   }
@@ -380,9 +397,9 @@ hdy_carousel_indicator_lines_class_init (HdyCarouselIndicatorLinesClass *klass)
   widget_class->draw = hdy_carousel_indicator_lines_draw;
 
   /**
-   * HdyCarouselIndicatorLines:carousel:
+   * HdyCarouselIndicatorLines:carousel: (attributes org.gtk.Property.get=hdy_carousel_indicator_lines_get_carousel org.gtk.Property.set=hdy_carousel_indicator_lines_set_carousel)
    *
-   * The #HdyCarousel the indicator uses.
+   * The displayed carousel.
    *
    * Since: 1.0
    */
@@ -410,9 +427,9 @@ hdy_carousel_indicator_lines_init (HdyCarouselIndicatorLines *self)
 /**
  * hdy_carousel_indicator_lines_new:
  *
- * Create a new #HdyCarouselIndicatorLines widget.
+ * Creates a new `HdyCarouselIndicatorLines`.
  *
- * Returns: (transfer full): The newly created #HdyCarouselIndicatorLines widget
+ * Returns: the newly created `HdyCarouselIndicatorLines`
  *
  * Since: 1.0
  */
@@ -423,14 +440,12 @@ hdy_carousel_indicator_lines_new (void)
 }
 
 /**
- * hdy_carousel_indicator_lines_get_carousel:
- * @self: a #HdyCarouselIndicatorLines
+ * hdy_carousel_indicator_lines_get_carousel: (attributes org.gtk.Method.get_property=carousel)
+ * @self: an indicator
  *
- * Get the #HdyCarousel the indicator uses.
+ * Gets the displayed carousel.
  *
- * See: hdy_carousel_indicator_lines_set_carousel()
- *
- * Returns: (nullable) (transfer none): the #HdyCarousel, or %NULL if none has been set
+ * Returns: (nullable) (transfer none): the displayed carousel
  *
  * Since: 1.0
  */
@@ -444,11 +459,11 @@ hdy_carousel_indicator_lines_get_carousel (HdyCarouselIndicatorLines *self)
 }
 
 /**
- * hdy_carousel_indicator_lines_set_carousel:
- * @self: a #HdyCarouselIndicatorLines
- * @carousel: (nullable): a #HdyCarousel
+ * hdy_carousel_indicator_lines_set_carousel: (attributes org.gtk.Method.set_property=carousel)
+ * @self: an indicator
+ * @carousel: (nullable): a carousel
  *
- * Sets the #HdyCarousel to use.
+ * Sets the [class@Carousel] to use.
  *
  * Since: 1.0
  */
@@ -479,7 +494,7 @@ hdy_carousel_indicator_lines_set_carousel (HdyCarouselIndicatorLines *self,
                              G_CONNECT_SWAPPED);
   }
 
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  gtk_widget_queue_resize (GTK_WIDGET (self));
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CAROUSEL]);
 }

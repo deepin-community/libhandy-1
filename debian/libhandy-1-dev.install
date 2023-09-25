@@ -4,5 +4,5 @@ usr/lib/*/glade/modules/libglade-handy-?.so
 usr/lib/*/pkgconfig/*
 usr/share/gir-1.0/*
 usr/share/glade/catalogs/
-usr/share/gtk-doc/
+usr/share/doc
 usr/share/vala/vapi/

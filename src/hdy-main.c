@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2018-2020 Purism SPC
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 #include "config.h"
 #include "hdy-main-private.h"
@@ -10,17 +10,6 @@
 #include <gtk/gtk.h>
 
 static gint hdy_initialized = FALSE;
-
-/**
- * SECTION:hdy-main
- * @short_description: Library initialization.
- * @Title: hdy-main
- *
- * Before using the Handy library you should initialize it by calling the
- * hdy_init() function.
- * This makes sure translations, types, themes, and icons for the Handy library
- * are set up properly.
- */
 
 /* The style provider priority to use for libhandy widgets custom styling. It is
  * higher than themes and settings, allowing to override theme defaults, but
@@ -176,13 +165,18 @@ hdy_icons_init (void)
 /**
  * hdy_init:
  *
+ * Initializes Libhandy.
+ *
  * Call this function just after initializing GTK, if you are using
- * #GtkApplication it means it must be called when the #GApplication::startup
- * signal is emitted. If libhandy has already been initialized, the function
- * will simply return.
+ * [class@Gtk.Application] it means it must be called when the
+ * [signal@Gio.Application::startup] signal is emitted.
+ *
+ * If Libhandy has already been initialized, the function will simply return.
  *
  * This makes sure translations, types, themes, and icons for the Handy library
  * are set up properly.
+ *
+ * Since: 1.0
  */
 void
 hdy_init (void)

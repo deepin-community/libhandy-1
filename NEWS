@@ -1,4 +1,146 @@
 =============
+Version 1.8.2
+=============
+
+- Demo
+  - Correctly use GtkSwitch
+  - Fix a GLib deprecation
+- Docs
+  - Fix dependency names
+- HdyTabView
+  - Fix set_menu_model() input check
+  - Fix a typo in docs
+- HdySwipeable
+  - Fix get_swipe_area() fallback
+- Memory leak fixes
+- Translation updates
+  - Slovenian
+
+=============
+Version 1.8.1
+=============
+
+- Fix double click handling for HdyWindowHandle and HdyHeaderBar
+- Translation updates
+  - Russian
+
+=============
+Version 1.8.0
+=============
+
+- Translation updates
+  - Basque
+  - Croatian
+  - Korean
+
+==============
+Version 1.7.90
+==============
+
+- Remove unnecessary cast in HdyPreferencesGroup
+- Translation updates
+  - Georgian
+  - German
+
+=============
+Version 1.7.0
+=============
+
+- HdyDeck
+  - Remove a non-existent property mention
+- HdyStyleManager
+  - Correctly reset the theme if we're not overriding it.
+    Fixes switching away from HighContrast.
+  - Fix a typo in docs
+  - Remove a leftover debug message
+  - Add environment variables to control styles from Builder
+- Fix license in docs
+- Fix a Meson error when using as a subproject
+- Translation updates:
+  - Chinese (China)
+  - Dutch
+  - Indonesian
+  - Persian
+  - Turkish
+
+=============
+Version 1.6.0
+=============
+
+- Fix introspection-related build warnings
+- AdwStyleManager
+  - Make color-scheme work with GTK themes ending in -dark
+- Translation updates:
+  - Basque
+  - Hungarian
+
+==============
+Version 1.5.91
+==============
+
+- HdyAvatar
+  - Fix invalid UTF-8 handling
+- HdyStyleManager
+  - Don't disable non-CSS animations during style changes
+- Fix carousel indicator sizing
+
+==============
+Version 1.5.90
+==============
+
+- Documentation
+  - Port to gi-docgen
+  - Use "Since: 1.0" for pre-1.0 symbols
+  - Various cleanups and consistency updates
+- Demo
+  - Fix keyboard navigation
+  - Don't make rows containing buttons activatable
+  - Set minimum width on the view switcher window
+- HdyCarousel
+  - Properly remove mouse wheel timer
+- HdyClamp
+  - Fix measuring
+- HdyKeypad
+  - Fix keyboard navigation
+- HdyStyleManager
+  - Properly reset animations after style changes
+- HdySwipeTracker
+  - Fix a runtime warning
+- HdyTabView
+  - Propagate Alt+[0-9] when trying to switch to the selected tab
+- HdyViewSwitcher
+  - Properly center button labels
+- Build and CI cleanups
+- Remove unused distro packaging
+- Translation updates:
+  - Czech
+  - Romanian
+  - Slovenian
+  - Spanish
+
+=============
+Version 1.5.0
+=============
+
+- Introduce HdyStyleManager for managing color schemes (light/dark) and
+  high contrast mode.
+  - Support the cross-platform color scheme preference in the
+    settings portal.
+- HdyPreferencesPage
+  - Remove adaptive margins to fix default window sizes
+- HdyTabBar
+  - Handle middle click on button release rather than press
+- Various memory leak fixes
+- Translation updates:
+  - Brazilian Portuguese
+  - Finnish
+  - Indonesian
+  - Portuguese
+  - Serbian
+  - Swedish
+  - Ukrainian
+
+=============
 Version 1.4.0
 =============
 

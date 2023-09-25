@@ -1,6 +1,6 @@
 project('libhandy', 'c',
-          version: '1.4.0',
-          license: 'LGPL-2.1+',
+          version: '1.8.2',
+          license: 'LGPL-2.1-or-later',
     meson_version: '>= 0.49.0',
   default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
 )
@@ -141,6 +141,10 @@ configure_file(
          output: 'run',
   configuration: run_data)
 
+if not meson.is_subproject()
+    meson.add_dist_script('build-aux'/ 'meson'/ 'dist-data.py')
+endif
+
 summary = [
   '',
   '------',
@@ -157,4 +161,5 @@ summary = [
 ]
 
 message('\n'.join(summary))
+
 

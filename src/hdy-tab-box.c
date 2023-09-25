@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2020 Purism SPC
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  *
  * Author: Alexander Mikhaylenko <alexander.mikhaylenko@puri.sm>
  */
@@ -2909,12 +2909,6 @@ hdy_tab_box_button_press_event (GtkWidget      *widget,
 
   self->pressed_button = event->button;
 
-  if (self->pressed_button == GDK_BUTTON_MIDDLE) {
-    hdy_tab_view_close_page (self->view, self->pressed_tab->page);
-
-    return GDK_EVENT_STOP;
-  }
-
   if (self->pressed_button != GDK_BUTTON_PRIMARY)
     return GDK_EVENT_PROPAGATE;
 
@@ -2961,13 +2955,20 @@ hdy_tab_box_button_release_event (GtkWidget      *widget,
                                   GdkEventButton *event)
 {
   HdyTabBox *self = HDY_TAB_BOX (widget);
+  gboolean ret = GDK_EVENT_PROPAGATE;
+
+  if (self->pressed_button == GDK_BUTTON_MIDDLE) {
+    hdy_tab_view_close_page (self->view, self->pressed_tab->page);
+
+    ret = GDK_EVENT_STOP;
+  }
 
   self->pressed = FALSE;
   self->pressed_button = 0;
 
   end_dragging (self);
 
-  return GDK_EVENT_PROPAGATE;
+  return ret;
 }
 
 static gboolean

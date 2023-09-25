@@ -38,7 +38,7 @@
                   <object class="GtkRevealer" id="header_revealer">
                     <property name="visible">True</property>
                     <property name="transition-type">slide-down</property>
-                    <property name="reveal-child" bind-source="window_header_revealer_switch" bind-property="state" bind-flags="sync-create | bidirectional"/>
+                    <property name="reveal-child" bind-source="window_header_revealer_switch" bind-property="active" bind-flags="sync-create | bidirectional"/>
                     <child>
                       <object class="HdyHeaderBar" id="header_bar">
                         <property name="visible">True</property>
@@ -46,12 +46,10 @@
                         <property name="title" translatable="yes">Handy Demo</property>
                         <property name="show_close_button">True</property>
                         <child>
-                          <object class="GtkButton">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <signal name="clicked" handler="theme_variant_button_clicked_cb" swapped="yes"/>
+                          <object class="GtkButton" id="color_scheme_button">
+                            <signal name="clicked" handler="color_scheme_button_clicked_cb" swapped="yes"/>
                             <child>
-                              <object class="GtkImage" id="theme_variant_image">
+                              <object class="GtkImage" id="color_scheme_image">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                               </object>
@@ -159,7 +157,6 @@
                             <property name="show_close_button">True</property>
                             <child>
                               <object class="GtkButton" id="back">
-                                <property name="can_focus">False</property>
                                 <property name="receives_default">False</property>
                                 <property name="valign">center</property>
                                 <property name="use-underline">True</property>
@@ -195,7 +192,6 @@
                             <property name="show_close_button">True</property>
                             <child>
                               <object class="GtkButton">
-                                <property name="can_focus">False</property>
                                 <property name="receives_default">False</property>
                                 <property name="valign">center</property>
                                 <property name="use-underline">True</property>
@@ -222,7 +218,6 @@
                             <child>
                               <object class="GtkToggleButton">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="receives_default">False</property>
                                 <property name="valign">center</property>
                                 <property name="use-underline">True</property>
@@ -323,7 +318,6 @@
                             <child>
                               <object class="GtkListBox">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="expand">True</property>
                                 <property name="selection-mode">none</property>
                                 <style>
@@ -377,7 +371,6 @@
                             <child>
                               <object class="GtkBox" id="box_keypad">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="valign">center</property>
                                 <property name="hexpand">True</property>
                                 <property name="orientation">vertical</property>
@@ -385,7 +378,6 @@
                                 <child>
                                   <object class="GtkListBox" id="keypad_listbox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
                                     <property name="expand">True</property>
                                     <property name="selection-mode">none</property>
                                     <style>
@@ -394,14 +386,13 @@
                                     <child>
                                       <object class="HdyActionRow">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
                                         <property name="title" translatable="yes">Show letters</property>
                                         <property name="activatable_widget">keypad_letters_visible</property>
                                         <child>
                                           <object class="GtkSwitch" id="keypad_letters_visible">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="state">True</property>
+                                            <property name="active">True</property>
                                             <property name="valign">center</property>
                                           </object>
                                         </child>
@@ -410,14 +401,13 @@
                                     <child>
                                       <object class="HdyActionRow">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
                                         <property name="title" translatable="yes">Show symbols</property>
                                         <property name="activatable_widget">keypad_symbols_visible</property>
                                         <child>
                                           <object class="GtkSwitch" id="keypad_symbols_visible">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="state">True</property>
+                                            <property name="active">True</property>
                                             <property name="valign">center</property>
                                           </object>
                                         </child>
@@ -428,17 +418,15 @@
                                 <child>
                                   <object class="GtkEntry" id="entry_keypad">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
                                   </object>
                                 </child>
                                 <child>
                                   <object class="HdyKeypad" id="keypad">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
                                     <property name="halign">center</property>
                                     <property name="entry">entry_keypad</property>
-                                    <property name="symbols-visible" bind-source="keypad_symbols_visible" bind-property="state" bind-flags="sync-create | bidirectional"/>
-                                    <property name="letters-visible" bind-source="keypad_letters_visible" bind-property="state" bind-flags="sync-create | bidirectional"/>
+                                    <property name="symbols-visible" bind-source="keypad_symbols_visible" bind-property="active" bind-flags="sync-create | bidirectional"/>
+                                    <property name="letters-visible" bind-source="keypad_letters_visible" bind-property="active" bind-flags="sync-create | bidirectional"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -475,7 +463,6 @@
                             <child>
                               <object class="GtkListBox" id="clamp_listbox">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="expand">True</property>
                                 <property name="selection-mode">none</property>
                                 <style>
@@ -483,7 +470,6 @@
                                 </style>
                                 <child>
                                   <object class="HdyActionRow">
-                                    <property name="can_focus">False</property>
                                     <property name="title" translatable="yes">Maximum width</property>
                                     <property name="visible">True</property>
                                     <child>
@@ -497,7 +483,6 @@
                                 </child>
                                 <child>
                                   <object class="HdyActionRow">
-                                    <property name="can_focus">False</property>
                                     <property name="title" translatable="yes">Tightening threshold</property>
                                     <property name="visible">True</property>
                                     <child>
@@ -553,12 +538,10 @@
                                 </child>
                                 <child>
                                   <object class="HdyActionRow">
-                                    <property name="activatable_widget">frobnicate</property>
                                     <property name="title" translatable="yes">Rows can have action widgets</property>
                                     <property name="visible">True</property>
                                     <child>
-                                      <object class="GtkButton" id="frobnicate">
-                                        <property name="can_focus">True</property>
+                                      <object class="GtkButton">
                                         <property name="halign">end</property>
                                         <property name="label" translatable="yes">Frobnicate</property>
                                         <property name="valign">center</property>
@@ -881,7 +864,6 @@
                             <child>
                               <object class="HdyClamp">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="halign">fill</property>
                                 <property name="valign">fill</property>
                                 <property name="margin-bottom">32</property>
@@ -893,7 +875,6 @@
                                 <child>
                                   <object class="GtkListBox" id="carousel_listbox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
                                     <property name="valign">center</property>
                                     <property name="selection-mode">none</property>
                                     <style>
@@ -948,7 +929,6 @@
                               <object class="GtkBox">
                                 <property name="visible">True</property>
                                 <property name="orientation">vertical</property>
-                                <property name="can_focus">False</property>
                                 <property name="halign">center</property>
                                 <property name="valign">center</property>
                                 <property name="vexpand">True</property>
@@ -957,7 +937,6 @@
                                 <child>
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Another page</property>
                                     <property name="justify">center</property>
                                     <property name="wrap">True</property>
@@ -971,7 +950,6 @@
                                 <child>
                                   <object class="GtkButton">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">_Return to the first page</property>
                                     <property name="use-underline">True</property>
                                     <signal name="clicked" handler="carousel_return_clicked_cb" swapped="no"/>
@@ -1044,7 +1022,7 @@
                                     <property name="valign">center</property>
                                     <property name="halign">center</property>
                                     <property name="size" bind-source="avatar_size" bind-property="value" bind-flags="sync-create"></property>
-                                    <property name="show-initials" bind-source="avatar_show_initials" bind-property="state" bind-flags="sync-create"/>
+                                    <property name="show-initials" bind-source="avatar_show_initials" bind-property="active" bind-flags="sync-create"/>
                                     <property name="text" bind-source="avatar_text" bind-property="text" bind-flags="sync-create"/>
                                   </object>
                                   <packing>
@@ -1095,13 +1073,11 @@
                             <child>
                               <object class="HdyClamp">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
                                 <property name="maximum-size">400</property>
                                 <property name="tightening-threshold">300</property>
                                 <child>
                                   <object class="GtkBox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
                                     <property name="valign">center</property>
                                     <property name="hexpand">True</property>
                                     <property name="orientation">vertical</property>
@@ -1109,7 +1085,6 @@
                                     <child>
                                       <object class="GtkListBox">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
                                         <property name="expand">True</property>
                                         <property name="selection-mode">none</property>
                                         <style>
@@ -1118,12 +1093,10 @@
                                         <child>
                                           <object class="HdyActionRow">
                                             <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
                                             <property name="title" translatable="yes">Text</property>
                                             <child>
                                               <object class="GtkEntry" id="avatar_text">
                                                 <property name="visible">True</property>
-                                                <property name="can_focus">True</property>
                                                 <property name="valign">center</property>
                                               </object>
                                             </child>
@@ -1132,15 +1105,13 @@
                                         <child>
                                           <object class="HdyActionRow">
                                             <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
                                             <property name="title" translatable="yes">Show initials</property>
                                             <property name="activatable_widget">avatar_show_initials</property>
                                             <child>
                                               <object class="GtkSwitch" id="avatar_show_initials">
                                                 <property name="visible">True</property>
-                                                <property name="can_focus">True</property>
                                                 <property name="valign">center</property>
-                                                <property name="state">True</property>
+                                                <property name="active">True</property>
                                               </object>
                                             </child>
                                           </object>
@@ -1148,12 +1119,10 @@
                                         <child>
                                           <object class="HdyActionRow">
                                             <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
                                             <property name="title" translatable="yes">File</property>
                                             <child>
                                               <object class="GtkFileChooserButton" id="avatar_filechooser">
                                                 <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
                                                 <property name="valign">center</property>
                                                 <property name="title" translatable="yes"/>
                                                 <signal name="file-set" swapped="yes" handler="avatar_file_set_cb"/>
@@ -1163,13 +1132,11 @@
                                             <child>
                                               <object class="GtkButton">
                                                 <property name="visible">True</property>
-                                                <property name="can_focus">True</property>
                                                 <property name="valign">center</property>
                                                 <signal name="clicked" swapped="yes" handler="avatar_file_remove_cb"/>
                                                 <child>
                                                   <object class="GtkImage">
                                                     <property name="visible">True</property>
-                                                    <property name="can_focus">False</property>
                                                     <property name="icon_name">avatar-delete-symbolic</property>
                                                     <property name="icon_size">1</property>
                                                   </object>
@@ -1181,12 +1148,10 @@
                                         <child>
                                           <object class="HdyActionRow">
                                             <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
                                             <property name="title" translatable="yes">Size</property>
                                             <child>
                                               <object class="GtkSpinButton" id="avatar_size">
                                                 <property name="visible">True</property>
-                                                <property name="can_focus">True</property>
                                                 <property name="valign">center</property>
                                                 <property name="numeric">True</property>
                                                 <property name="adjustment">avatar_adjustment</property>
@@ -1197,7 +1162,6 @@
                                         <child>
                                           <object class="HdyActionRow">
                                             <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
                                             <property name="title" translatable="yes">Export to file</property>
                                             <child>
                                               <object class="GtkButton" id="avatar_save_file">
@@ -1220,7 +1184,6 @@
                                     <child>
                                       <object class="GtkListBox" id="avatar_contacts">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
                                         <property name="expand">True</property>
                                         <property name="selection-mode">none</property>
                                         <style>
@@ -1251,7 +1214,6 @@
                         <child>
                           <object class="HdyClamp">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="halign">fill</property>
                             <property name="valign">fill</property>
                             <property name="expand">True</property>
@@ -1261,13 +1223,11 @@
                               <object class="GtkBox">
                                 <property name="visible">True</property>
                                 <property name="orientation">vertical</property>
-                                <property name="can_focus">False</property>
                                 <property name="valign">start</property>
                                 <property name="expand">True</property>
                                 <child>
                                   <object class="GtkListBox">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
                                     <property name="expand">True</property>
                                     <property name="selection-mode">none</property>
                                     <style>
@@ -1276,14 +1236,12 @@
                                     <child>
                                       <object class="HdyActionRow">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
                                         <property name="title" translatable="yes">Show titlebar</property>
                                         <property name="activatable_widget">window_header_revealer_switch</property>
                                         <child>
                                           <object class="GtkSwitch" id="window_header_revealer_switch">
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="state">True</property>
+                                            <property name="active">True</property>
                                             <property name="valign">center</property>
                                           </object>
                                         </child>
@@ -1385,7 +1343,6 @@
                 <property name="show_close_button">True</property>
                 <child>
                   <object class="GtkButton" id="deck-sub-back">
-                    <property name="can_focus">False</property>
                     <property name="receives_default">False</property>
                     <property name="valign">center</property>
                     <property name="use-underline">True</property>

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2020 Alexander Mikhaylenko <alexm@gnome.org>
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
 #include "config.h"
@@ -20,16 +20,15 @@ typedef enum {
 } HdyCorner;
 
 /**
- * PRIVATE:hdy-window-mixin
- * @short_description: A helper object for #HdyWindow and #HdyApplicationWindow
- * @title: HdyWindowMixin
- * @See_also: #HdyApplicationWindow, #HdyWindow
- * @stability: Private
+ * HdyWindowMixin:
  *
- * The HdyWindowMixin object contains the implementation of the HdyWindow and
- * HdyApplicationWindow classes, providing a way to make a GtkWindow subclass
- * that has masked window corners on all sides and no titlebar by default,
- * allowing for more freedom with how to handle the titlebar for applications.
+ * A helper object for [class@Window] and [class@ApplicationWindow]
+ *
+ * The [class@WindowMixin] object contains the implementation of the
+ * [class@Window] and [class@ApplicationWindow] classes, providing a way to make
+ * a [class@Gtk.Window] subclass that has masked window corners on all sides and
+ * no titlebar by default, allowing for more freedom with how to handle the
+ * titlebar for applications.
  *
  * Since: 1.0
  */
@@ -472,7 +471,6 @@ hdy_window_mixin_destroy (HdyWindowMixin *self)
 {
   if (self->content) {
     hdy_window_mixin_remove (self, self->content);
-    gtk_widget_destroy (self->content);
     self->content = NULL;
     self->child = NULL;
   }

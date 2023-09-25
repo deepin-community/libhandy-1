@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2017 Purism SPC
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
 #pragma once
@@ -47,6 +47,7 @@ G_BEGIN_DECLS
 #include "hdy-search-bar.h"
 #include "hdy-squeezer.h"
 #include "hdy-status-page.h"
+#include "hdy-style-manager.h"
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 #include "hdy-swipe-group.h"
 G_GNUC_END_IGNORE_DEPRECATIONS
