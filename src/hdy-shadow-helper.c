@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019 Alexander Mikhaylenko <exalm7659@gmail.com>
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
 #include "config.h"
@@ -13,15 +13,13 @@
 #include <math.h>
 
 /**
- * PRIVATE:hdy-shadow-helper
- * @short_description: Shadow helper used in #HdyLeaflet
- * @title: HdyShadowHelper
- * @See_also: #HdyLeaflet
- * @stability: Private
+ * HdyShadowHelper:
  *
- * A helper class for drawing #HdyLeaflet transition shadow.
+ * Shadow helper used in [class@Leaflet]
  *
- * Since: 0.0.12
+ * A helper class for drawing [class@Leaflet] transition shadow.
+ *
+ * Since: 1.0
  */
 
 struct _HdyShadowHelper
@@ -194,8 +192,7 @@ hdy_shadow_helper_dispose (GObject *object)
 
   hdy_shadow_helper_clear_cache (self);
 
-  if (self->widget)
-    g_clear_object (&self->widget);
+  self->widget = NULL;
 
   G_OBJECT_CLASS (hdy_shadow_helper_parent_class)->dispose (object);
 }
@@ -228,7 +225,7 @@ hdy_shadow_helper_set_property (GObject      *object,
 
   switch (prop_id) {
   case PROP_WIDGET:
-    self->widget = GTK_WIDGET (g_object_ref (g_value_get_object (value)));
+    self->widget = g_value_get_object (value);
     break;
 
   default:
@@ -248,9 +245,9 @@ hdy_shadow_helper_class_init (HdyShadowHelperClass *klass)
   /**
    * HdyShadowHelper:widget:
    *
-   * The widget the shadow will be drawn for. Must not be %NULL
+   * The widget the shadow will be drawn for. Must not be `NULL`.
    *
-   * Since: 0.0.11
+   * Since: 1.0
    */
   props[PROP_WIDGET] =
     g_param_spec_object ("widget",
@@ -270,11 +267,11 @@ hdy_shadow_helper_init (HdyShadowHelper *self)
 /**
  * hdy_shadow_helper_new:
  *
- * Creates a new #HdyShadowHelper object.
+ * Creates a new [class@ShadowHelper] object.
  *
- * Returns: The newly created #HdyShadowHelper object
+ * Returns: the newly created [class@ShadowHelper] object
  *
- * Since: 0.0.12
+ * Since: 1.0
  */
 HdyShadowHelper *
 hdy_shadow_helper_new (GtkWidget *widget)
@@ -286,11 +283,11 @@ hdy_shadow_helper_new (GtkWidget *widget)
 
 /**
  * hdy_shadow_helper_clear_cache:
- * @self: a #HdyShadowHelper
+ * @self: a shadow helper
  *
  * Clears shadow cache. This should be used after a transition is done.
  *
- * Since: 0.0.12
+ * Since: 1.0
  */
 void
 hdy_shadow_helper_clear_cache (HdyShadowHelper *self)
@@ -316,7 +313,7 @@ hdy_shadow_helper_clear_cache (HdyShadowHelper *self)
 
 /**
  * hdy_shadow_helper_draw_shadow:
- * @self: a #HdyShadowHelper
+ * @self: a shadow helper
  * @cr: a Cairo context to draw to
  * @width: the width of the shadow rectangle
  * @height: the height of the shadow rectangle
@@ -326,7 +323,7 @@ hdy_shadow_helper_clear_cache (HdyShadowHelper *self)
  * Draws a transition shadow. For caching to work, @width, @height and
  * @direction shouldn't change between calls.
  *
- * Since: 0.0.12
+ * Since: 1.0
  */
 void
 hdy_shadow_helper_draw_shadow (HdyShadowHelper *self,

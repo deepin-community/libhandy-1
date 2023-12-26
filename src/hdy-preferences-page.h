@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2019 Purism SPC
  *
- * SPDX-License-Identifier: LGPL-2.1+
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  */
 
 #pragma once
@@ -23,7 +23,7 @@ G_DECLARE_DERIVABLE_TYPE (HdyPreferencesPage, hdy_preferences_page, HDY, PREFERE
 
 /**
  * HdyPreferencesPageClass
- * @parent_class: The parent class
+ * @parent_class: the parent class
  */
 struct _HdyPreferencesPageClass
 {

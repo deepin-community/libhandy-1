@@ -11,7 +11,7 @@ Closes: #953971
  1 file changed, 1 insertion(+)
 
 diff --git a/tests/meson.build b/tests/meson.build
-index 95210ba..53a5e46 100644
+index 143bd6e..09ed75e 100644
 --- a/tests/meson.build
 +++ b/tests/meson.build
 @@ -7,6 +7,7 @@ test_env = [

@@ -43,6 +43,9 @@ startup (GtkApplication *app)
                                              GTK_STYLE_PROVIDER (css_provider),
                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
+  hdy_style_manager_set_color_scheme (hdy_style_manager_get_default (),
+                                      HDY_COLOR_SCHEME_PREFER_LIGHT);
+
   g_object_unref (css_provider);
 }
 
@@ -66,7 +69,7 @@ main (int    argc,
     { "preferences", show_preferences, NULL, NULL, NULL },
   };
 
-  app = gtk_application_new ("sm.puri.Handy.Demo", G_APPLICATION_FLAGS_NONE);
+  app = gtk_application_new ("sm.puri.Handy.Demo", 0);
   g_action_map_add_action_entries (G_ACTION_MAP (app),
                                    app_entries, G_N_ELEMENTS (app_entries),
                                    app);

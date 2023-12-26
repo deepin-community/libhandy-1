@@ -1,1 +1,8 @@
-.pc/
+_build
+*.swp
+*~
+\#*#
+.\#*
+build
+.buildconfig
+.flatpak-builder

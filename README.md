@@ -1,6 +1,6 @@
 # Handy
-[![Pipeline status](https://gitlab.gnome.org/GNOME/libhandy/badges/master/build.svg)](https://gitlab.gnome.org/GNOME/libhandy/commits/master)
-[![Code coverage](https://gitlab.gnome.org/GNOME/libhandy/badges/master/coverage.svg)](https://gitlab.gnome.org/GNOME/libhandy/commits/master)
+[![Pipeline status](https://gitlab.gnome.org/GNOME/libhandy/badges/main/build.svg)](https://gitlab.gnome.org/GNOME/libhandy/commits/main)
+[![Code coverage](https://gitlab.gnome.org/GNOME/libhandy/badges/main/coverage.svg)](https://gitlab.gnome.org/GNOME/libhandy/commits/main)
 
 The aim of the Handy library is to help with developing UI for mobile devices
 using GTK/GNOME.
@@ -8,16 +8,6 @@ using GTK/GNOME.
 ## License
 
 libhandy is licensed under the LGPL-2.1+.
-
-## Build dependencies
-
-To build libhandy you need to first install the build-deps defined by [the debian/control file](https://gitlab.gnome.org/GNOME/libhandy/blob/master/debian/control#L6).
-
-If you are running a Debian based distribution, you can easily install all those the dependencies making use of the following command
-
-```sh
-sudo apt-get build-dep .
-```
 
 ## Building
 
@@ -34,7 +24,7 @@ For build options see [meson_options.txt](./meson_options.txt). E.g. to enable d
 
 ```sh
 meson . _build -Dgtk_doc=true
-ninja -C _build libhandy-doc
+ninja -C _build
 ```
 
 ## Usage
