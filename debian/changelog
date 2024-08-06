@@ -1,3 +1,26 @@
+libhandy-1 (1.8.3-1) unstable; urgency=medium
+
+  * New upstream release
+  * Stop using debian/control.in and dh_gnome_clean
+  * autopkgtest: Allow stderr for mesa's zink errors
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 09 Feb 2024 16:04:38 -0500
+
+libhandy-1 (1.8.2-3) unstable; urgency=medium
+
+  * Team upload
+
+  [ Amin Bandali ]
+  * Update packaging branch to debian/latest
+
+  [ Simon McVittie ]
+  * d/rules: Run tests under a dbus-daemon for better coverage
+  * Build-depend on librsvg2-common.
+    We need the SVG loader for the avatar-default-symbolic icon.
+    (Closes: #1052965)
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 26 Sep 2023 17:30:37 +0100
+
 libhandy-1 (1.8.2-2) unstable; urgency=medium
 
   * Release to unstable
